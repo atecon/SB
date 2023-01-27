@@ -63,7 +63,7 @@ function matrix SB_old2 (matrix x "Data to be resampled",
 end function
 
 
-function matrix SB (matrix x "Data to be resampled",
+function matrix SB (const matrix x "Data to be resampled",
                     scalar b[0::0] "Mean block size",
                     int iterations[1::1999])
     /* Main function doing the stationary time-series block-bootstrap. */
@@ -79,15 +79,15 @@ function matrix SB (matrix x "Data to be resampled",
     endif
 
     p = 1/b
-    s = seq(1,n)'
-    u = 1 | (muniform(n-1,1) .< p)
+    s = seq(1, n)'
+    u = 1 | (muniform((n-1), 1) .< p)
     r = cum(u)
     nr = r[n]
     sub = selifr(r ~ s, u)
     sub[,2] -= mrandgen(i, 1, n, nr, 1)
 
     s -= replace(r, sub[,1], sub[,2])
-    s = ((s-1)%n) + 1
+    s = ((s-1) % n) + 1
 
     return x[s,]
 end function
