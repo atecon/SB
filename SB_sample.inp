@@ -1,0 +1,120 @@
+#------------
+# Example 1
+#------------
+set verbose off
+include SB.gfn
+
+# load Johansen macroeconomic data
+open denmark.gdt
+scalar nboot=999		# no. of bootstrap iterations
+scalar b = 0	# use rule-of-thumb value
+# run OLS with real money as dependent variable, real income and bond rate as explanatory variables.
+list lx=LRY IBO 
+ols LRM 0 lx
+bhat=$coeff		# store coefficient vector
+lrmh=$yhat		# store fitted values
+uh={$uhat}		# store residuals as matrix
+
+# Construct bootstrap pseudodata using rule-of-thumb block size,
+# estimate model nboot times and store estimated coefficients in the matrix bb
+matrix bb=zeros(nboot,$ncoeff)
+
+loop boot=1..nboot --quiet
+    matrix ub=SB(uh,b)	# resample
+    series ubs=ub
+    series lrmb=lrmh+ubs    
+    #Note that since ubs is guaranteed to be stationary lrmb and lx cointegrate by construction. With the block bootstrap this is not true, and some
+    #of the nboot regressions of lrmb on lx may be spurious
+    ols lrmb 0 lx --quiet
+    bb[boot,]=$coeff'
+endloop
+
+# take percentiles of distribution of bootstrap estimates
+matrix bb05=quantile(bb,0.05)
+matrix bb95=quantile(bb,0.95)
+print ""
+print "******************************************************************************* "
+print ""
+printf "estimated coefficients %10.2f", bhat'
+print ""
+print "95% bootstrap confidence intervals"
+print ""
+printf "Lower limits %15.2f", bb05
+printf "Upper limits %15.2f", bb95
+print ""
+print "******************************************************************************* "
+
+
+
+/* Activate iff needed
+#--------------------------------------
+# Example 2: Comparison of SB() and
+# SB_old1() for pedagocial purpose only
+#--------------------------------------
+set verbose off
+include SB.gfn
+open denmark.gdt -q
+# run OLS with real money as dependent variable, real income and bond rate as explanatory variables.
+scalar nboot=1999
+scalar b = 0
+list lx=LRY IBO 
+ols LRM 0 lx 
+bhat=$coeff
+lrmh=$yhat
+uh={$uhat}
+
+# Run SB_old1()
+matrix bb=zeros(nboot,$ncoeff)
+set stopwatch
+loop boot=1..nboot --quiet
+    ub=SB_old1(uh,b)
+    series ubs=ub[,1]
+    series lrmb=lrmh+ubs    
+    ols lrmb 0 lx --quiet
+    bb[boot,]=$coeff'
+endloop
+
+# take percentiles of distribution of bootstrap estimates
+matrix bb05=quantile(bb,0.05)
+matrix bb95=quantile(bb,0.95)
+print ""
+print "******************************************************************************* "
+printf "SBslow() took = %.3f sec.\n", $stopwatch
+print ""
+printf "estimated coefficients %10.2f", bhat'
+print ""
+print "95% bootstrap confidence intervals"
+print ""
+printf "Lower limits %15.2f", bb05
+printf "Upper limits %15.2f", bb95
+print ""
+print "******************************************************************************* "
+
+
+# Run SB()
+matrix bb=zeros(nboot,$ncoeff)
+set stopwatch
+loop boot=1..nboot --quiet
+    ub=SB(uh,b)
+    series ubs=ub[,1]
+    series lrmb=lrmh+ubs
+    ols lrmb 0 lx --quiet
+    bb[boot,]=$coeff'
+endloop
+
+# take percentiles of distribution of bootstrap estimates
+matrix bb05=quantile(bb,0.05)
+matrix bb95=quantile(bb,0.95)
+print ""
+print "******************************************************************************* "
+printf "SB() took = %.3f sec.\n", $stopwatch
+print ""
+printf "estimated coefficients %10.2f", bhat'
+print ""
+print "95% bootstrap confidence intervals"
+print ""
+printf "Lower limits %15.2f", bb05
+printf "Upper limits %15.2f", bb95
+print ""
+print "******************************************************************************* "
+*/

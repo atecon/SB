@@ -1,0 +1,11 @@
+author = F. Di Iorio, S. Fachin, A. Tarassow, Riccardo "Jack" Lucchetti
+email = stefano.fachin@uniroma1.it
+version = 1.3
+date = 2017-11-14
+description = Stationary bootstrap resampling of time series
+tags = C88
+min-version = 1.9.4
+public = SB
+data-requirement = no-data-ok
+help = SB_help.txt
+sample-script = SB_sample.inp
