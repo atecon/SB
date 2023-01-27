@@ -15,18 +15,17 @@ American Statistical Association, vol. 89, 1994, pp. 1303-1313).
 
 PUBLIC FUNCTIONS:
 -----------------------------------------------------------------------
-Function:       SB(matrix x &quot;Data to be resampled&quot;, int b[0::0] &quot;Mean block size&quot;,
-                   int iterations[1::1])
+Function:       SB(matrix x &quot;Data to be resampled&quot;,
+                   int b[0::0] &quot;Mean block size&quot;)
 
 Arguments:
-x:          matrix, Data to be resampled. Rows: time periods, columns: variables
+x:          matrix, Data to be resampled. Rows: time periods,
+            columns:variables
 b:          int, Mean block size; if b=0 (default): use rule-of-thumb
             b = round(1.75*(T^(1/3)) as in Palm, F.C., S. Smeekes,
             J.P. Urbain (2011) &quot;Cross-sectional dependence robust block
             bootstrap panel unit root tests&quot;, Journal of Econometrics, 163,
             85-104.
-iterations: int, Number of bootstrap iterations (default = 1999)
-
 
 Return:
 Matrix of I(0) bootstrap pseudo-data of the same dimensions of the input matrix.
@@ -43,13 +42,15 @@ the Engle-Granger test. Hence, the OLS residuals are stationary. However, the
 residuals will generally be weakly dependent, so that simple redrawing as
 carried out by the Gretl function &quot;resample&quot; cannot be applied, while block
 bootstrap as carried out by &quot;resample&quot; with the optional &quot;b&quot; argument would be
-legitimate. However, the block bootstrap is not guaranteed to produce stationary
-pseudo-residuals. This will have serious consequences in this context.
+legitimate. However, the block bootstrap is not guaranteed to
+produce stationary pseudo-residuals. This will have serious consequences in this context.
 
 
 Changelog:
 1.4:
-  -
+  - Remove the obsolete 3rd argument for the SB() function
+  - Fix typos
+  - Improve manual
 1.3:
   - Implementation of a much faster code
   - Note: The functions SB_old1 (the initial version) and SB_old2 are deprecated
@@ -67,18 +68,17 @@ American Statistical Association, vol. 89, 1994, pp. 1303-1313).
 
 PUBLIC FUNCTIONS:
 -----------------------------------------------------------------------
-Function:       SB(matrix x &quot;Data to be resampled&quot;, int b[0::0] &quot;Mean block size&quot;,
-                   int iterations[1::1])
+Function:       SB(matrix x &quot;Data to be resampled&quot;,
+                   int b[0::0] &quot;Mean block size&quot;)
 
 Arguments:
-x:          matrix, Data to be resampled. Rows: time periods, columns: variables
+x:          matrix, Data to be resampled. Rows: time periods,
+            columns:variables
 b:          int, Mean block size; if b=0 (default): use rule-of-thumb
             b = round(1.75*(T^(1/3)) as in Palm, F.C., S. Smeekes,
             J.P. Urbain (2011) &quot;Cross-sectional dependence robust block
             bootstrap panel unit root tests&quot;, Journal of Econometrics, 163,
             85-104.
-iterations: int, Number of bootstrap iterations (default = 1999)
-
 
 Return:
 Matrix of I(0) bootstrap pseudo-data of the same dimensions of the input matrix.
@@ -95,13 +95,15 @@ the Engle-Granger test. Hence, the OLS residuals are stationary. However, the
 residuals will generally be weakly dependent, so that simple redrawing as
 carried out by the Gretl function &quot;resample&quot; cannot be applied, while block
 bootstrap as carried out by &quot;resample&quot; with the optional &quot;b&quot; argument would be
-legitimate. However, the block bootstrap is not guaranteed to produce stationary
-pseudo-residuals. This will have serious consequences in this context.
+legitimate. However, the block bootstrap is not guaranteed to
+produce stationary pseudo-residuals. This will have serious consequences in this context.
 
 
 Changelog:
 1.4:
-  -
+  - Remove the obsolete 3rd argument for the SB() function
+  - Fix typos
+  - Improve manual
 1.3:
   - Implementation of a much faster code
   - Note: The functions SB_old1 (the initial version) and SB_old2 are deprecated
@@ -111,14 +113,13 @@ Changelog:
   - Old function still available under SBslow()
 </gui-help>
 <gretl-function name="SB" type="matrix" pkg-role="gui-main">
- <params count="3">
-  <param name="x" type="matrix">
+ <params count="2">
+  <param name="x" type="matrix" const="true">
 <description>Data to be resampled</description>
   </param>
   <param name="b" type="scalar" min="0" default="0">
 <description>Mean block size</description>
   </param>
-  <param name="iterations" type="int" min="1" default="1999"/>
  </params>
 <code>/* Main function doing the stationary time-series block-bootstrap. */
 scalar n = rows(x)
@@ -129,14 +130,14 @@ if b==0
   b = round(1.75*(n^(1/3)))
 endif
 p = 1/b
-s = seq(1,n)'
-u = 1 | (muniform(n-1,1) .&lt; p)
+s = seq(1, n)'
+u = 1 | (muniform((n-1), 1) .&lt; p)
 r = cum(u)
 nr = r[n]
 sub = selifr(r ~ s, u)
 sub[,2] -= mrandgen(i, 1, n, nr, 1)
 s -= replace(r, sub[,1], sub[,2])
-s = ((s-1)%n) + 1
+s = ((s-1) % n) + 1
 return x[s,]
 </code>
 </gretl-function>
@@ -212,42 +213,41 @@ return mx[u,]
 </code>
 </gretl-function>
 <sample-script>
-#------------
-# Example 1
-#------------
+clear
 set verbose off
 include SB.gfn
 
 # load Johansen macroeconomic data
 open denmark.gdt
-scalar nboot=999		# no. of bootstrap iterations
-scalar b = 0	# use rule-of-thumb value
-# run OLS with real money as dependent variable, real income and bond rate as explanatory variables.
-list lx=LRY IBO 
-ols LRM 0 lx
-bhat=$coeff		# store coefficient vector
-lrmh=$yhat		# store fitted values
-uh={$uhat}		# store residuals as matrix
+scalar NBOOT = 999		# no. of bootstrap iterations
+# run OLS with real money as dependent variable, real income and bond
+# rate as explanatory variables
+list lx = LRY IBO
+ols LRM 0 lx --simple
+bhat = $coeff		# store coefficient vector
+lrmh = $yhat		# store fitted values
+uh = {$uhat}		# store residuals as matrix
 
-# Construct bootstrap pseudodata using rule-of-thumb block size,
-# estimate model nboot times and store estimated coefficients in the matrix bb
-matrix bb=zeros(nboot,$ncoeff)
+# Construct bootstrap pseudo-data using rule-of-thumb block size,
+# estimate model NBOOT times and store estimated coefficients in the matrix bb
+matrix bb = zeros(NBOOT, $ncoeff)
 
-loop boot=1..nboot --quiet
-    matrix ub=SB(uh,b)	# resample
-    series ubs=ub
-    series lrmb=lrmh+ubs    
-    #Note that since ubs is guaranteed to be stationary lrmb and lx cointegrate by construction. With the block bootstrap this is not true, and some
-    #of the nboot regressions of lrmb on lx may be spurious
+loop boot=1..NBOOT
+    matrix ub = SB(uh)	# resample
+    series ubs =ub
+    series lrmb =lrmh+ubs
+    # Note that since ubs is guaranteed to be stationary lrmb and lx
+    # cointegrate by construction. With the block bootstrap this is not
+    # true, and some of the NBOOT regressions of lrmb on lx may be spurious
     ols lrmb 0 lx --quiet
-    bb[boot,]=$coeff'
+    bb[boot,] = $coeff'
 endloop
 
 # take percentiles of distribution of bootstrap estimates
-matrix bb05=quantile(bb,0.05)
-matrix bb95=quantile(bb,0.95)
+matrix bb05 = quantile(bb, 0.05)
+matrix bb95 = quantile(bb, 0.95)
 print &quot;&quot;
-print &quot;******************************************************************************* &quot;
+print &quot;***************************************************************** &quot;
 print &quot;&quot;
 printf &quot;estimated coefficients %10.2f&quot;, bhat'
 print &quot;&quot;
@@ -256,82 +256,7 @@ print &quot;&quot;
 printf &quot;Lower limits %15.2f&quot;, bb05
 printf &quot;Upper limits %15.2f&quot;, bb95
 print &quot;&quot;
-print &quot;******************************************************************************* &quot;
-
-
-
-/* Activate iff needed
-#--------------------------------------
-# Example 2: Comparison of SB() and
-# SB_old1() for pedagocial purpose only
-#--------------------------------------
-set verbose off
-include SB.gfn
-open denmark.gdt -q
-# run OLS with real money as dependent variable, real income and bond rate as explanatory variables.
-scalar nboot=1999
-scalar b = 0
-list lx=LRY IBO 
-ols LRM 0 lx 
-bhat=$coeff
-lrmh=$yhat
-uh={$uhat}
-
-# Run SB_old1()
-matrix bb=zeros(nboot,$ncoeff)
-set stopwatch
-loop boot=1..nboot --quiet
-    ub=SB_old1(uh,b)
-    series ubs=ub[,1]
-    series lrmb=lrmh+ubs    
-    ols lrmb 0 lx --quiet
-    bb[boot,]=$coeff'
-endloop
-
-# take percentiles of distribution of bootstrap estimates
-matrix bb05=quantile(bb,0.05)
-matrix bb95=quantile(bb,0.95)
-print &quot;&quot;
-print &quot;******************************************************************************* &quot;
-printf &quot;SBslow() took = %.3f sec.\n&quot;, $stopwatch
-print &quot;&quot;
-printf &quot;estimated coefficients %10.2f&quot;, bhat'
-print &quot;&quot;
-print &quot;95% bootstrap confidence intervals&quot;
-print &quot;&quot;
-printf &quot;Lower limits %15.2f&quot;, bb05
-printf &quot;Upper limits %15.2f&quot;, bb95
-print &quot;&quot;
-print &quot;******************************************************************************* &quot;
-
-
-# Run SB()
-matrix bb=zeros(nboot,$ncoeff)
-set stopwatch
-loop boot=1..nboot --quiet
-    ub=SB(uh,b)
-    series ubs=ub[,1]
-    series lrmb=lrmh+ubs
-    ols lrmb 0 lx --quiet
-    bb[boot,]=$coeff'
-endloop
-
-# take percentiles of distribution of bootstrap estimates
-matrix bb05=quantile(bb,0.05)
-matrix bb95=quantile(bb,0.95)
-print &quot;&quot;
-print &quot;******************************************************************************* &quot;
-printf &quot;SB() took = %.3f sec.\n&quot;, $stopwatch
-print &quot;&quot;
-printf &quot;estimated coefficients %10.2f&quot;, bhat'
-print &quot;&quot;
-print &quot;95% bootstrap confidence intervals&quot;
-print &quot;&quot;
-printf &quot;Lower limits %15.2f&quot;, bb05
-printf &quot;Upper limits %15.2f&quot;, bb95
-print &quot;&quot;
-print &quot;******************************************************************************* &quot;
-*/
+print &quot;***************************************************************** &quot;
 </sample-script>
 </gretl-function-package>
 </gretl-functions>
