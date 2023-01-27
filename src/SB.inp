@@ -64,8 +64,7 @@ end function
 
 
 function matrix SB (const matrix x "Data to be resampled",
-                    scalar b[0::0] "Mean block size",
-                    int iterations[1::1999])
+                    scalar b[0::0] "Mean block size")
     /* Main function doing the stationary time-series block-bootstrap. */
 
     scalar n = rows(x)
