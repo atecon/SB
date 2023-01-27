@@ -15,7 +15,7 @@ bhat=$coeff		# store coefficient vector
 lrmh=$yhat		# store fitted values
 uh={$uhat}		# store residuals as matrix
 
-# Construct bootstrap pseudodata using rule-of-thumb block size,
+# Construct bootstrap pseudo-data using rule-of-thumb block size,
 # estimate model nboot times and store estimated coefficients in the matrix bb
 matrix bb=zeros(nboot,$ncoeff)
 
@@ -49,7 +49,7 @@ print "*************************************************************************
 /* Activate iff needed
 #--------------------------------------
 # Example 2: Comparison of SB() and
-# SB_old1() for pedagocial purpose only
+# SB_old1() for pedagogic purpose only
 #--------------------------------------
 set verbose off
 include SB.gfn
