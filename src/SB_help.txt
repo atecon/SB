@@ -19,7 +19,8 @@ b:          int, Mean block size; if b=0 (default): use rule-of-thumb
             85-104.
 
 Return:
-Matrix of I(0) bootstrap pseudo-data of the same dimensions of the input matrix.
+Matrix of I(0) bootstrap pseudo-data of the same dimensions of the input
+matrix.
 
 
 Note on the sample script:
@@ -34,7 +35,8 @@ residuals will generally be weakly dependent, so that simple redrawing as
 carried out by the Gretl function "resample" cannot be applied, while block
 bootstrap as carried out by "resample" with the optional "b" argument would be
 legitimate. However, the block bootstrap is not guaranteed to
-produce stationary pseudo-residuals. This will have serious consequences in this context.
+produce stationary pseudo-residuals. This will have serious consequences in
+this context.
 
 
 Changelog:
@@ -44,8 +46,8 @@ Changelog:
   - Improve manual
 1.3:
   - Implementation of a much faster code
-  - Note: The functions SB_old1 (the initial version) and SB_old2 are deprecated
-    and for pedagogic purposes only
+  - Note: The functions SB_old1 (the initial version) and SB_old2 are
+    deprecated and for pedagogic purposes only
 1.2:
   - Implementation of a faster code
   - Old function still available under SBslow()
